@@ -1,3 +1,2 @@
 python-mlb-statsapi
 requests
-ast
