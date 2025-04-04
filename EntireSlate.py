@@ -1,8 +1,6 @@
 import streamlit as st
 import currentslate
 import currentslatehitters
-import tkinter as tk
-from tkinter import filedialog
 import pandas as pd
 from scipy.stats import norm
 import statistics
