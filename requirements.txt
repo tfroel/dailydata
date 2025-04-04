@@ -1,3 +1,4 @@
 python-mlb-statsapi
 requests
+beautifulsoup4
 streamlit >= 1.9.2
