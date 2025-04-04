@@ -12,6 +12,7 @@ def currentslate(matchupdf):
     mlb = mlbstatsapi.Mlb()
     FD = matchupdf
     FD = FD[FD["Probable Pitcher"] == "Yes"]
+    FD =FD[FD["Nickname"] != "Luis F. Castillo"]
     starters = FD["Nickname"]
     matchups = FD["Game"].to_list()
     teams = []
