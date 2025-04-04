@@ -1,6 +1,8 @@
 import streamlit as st
 import currentslate
 import currentslatehitters
+import tkinter as tk
+from tkinter import filedialog
 import pandas as pd
 from scipy.stats import norm
 import statistics
@@ -112,16 +114,19 @@ def top_fourstacks(alldatadf):
 
 st.title("Data!")
 all_players = st.file_uploader("Upload FD CSV")
-alldatadf, pitcherdf = dataload(all_players)
-teamsummarydf = teamsummary(alldatadf)
-pitchersummarydf = pitchersummary(pitcherdf,teamsummarydf)
-stacksdf = top_fourstacks(alldatadf)
-st.dataframe(alldatadf, hide_index = True)
-st.write("-"*100)
-st.dataframe(pitchersummarydf, hide_index = True)
-st.write("-"*100)
-st.dataframe(teamsummarydf,hide_index = True)
-st.write("--"*100)
-st.dataframe(stacksdf, hide_index=True, width=1500)
+if all_players is None:
+    st.markdown("Upload File")
+else:
+    alldatadf, pitcherdf = dataload(all_players)
+    teamsummarydf = teamsummary(alldatadf)
+    pitchersummarydf = pitchersummary(pitcherdf,teamsummarydf)
+    stacksdf = top_fourstacks(alldatadf)
+    st.dataframe(alldatadf, hide_index = True)
+    st.write("-"*100)
+    st.dataframe(pitchersummarydf, hide_index = True)
+    st.write("-"*100)
+    st.dataframe(teamsummarydf,hide_index = True)
+    st.write("--"*100)
+    st.dataframe(stacksdf, hide_index=True)
 
 
