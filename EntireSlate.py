@@ -8,6 +8,9 @@ from scipy.stats import norm
 import statistics
 
 
+st.set_page_config(
+    layout="wide",
+)
 
 @st.cache_data
 def dataload(file):
@@ -32,7 +35,7 @@ def dataload(file):
         opponents.append(matchupdf[matchupdf["Nickname"] == pitcher]["Opponent"].values[0])
     pitcherdf["Team"] = teams
     pitcherdf["Opponent"] = opponents
-    pitcherdf = pitcherdf[["Name","Team","Opponent","Rank","K%"]]
+    pitcherdf = pitcherdf[["Name","Team","Opponent","K%","Rank"]]
     maxrank = max(pitcherdf["Rank"])
     alldata = []
     for index, row in hitterdf.iterrows():
@@ -50,12 +53,14 @@ def dataload(file):
         ceiling = norm.ppf(q = min(0.99, cdf + ceilingplus), loc = statistics.mean(historicdata["wOBA"]), scale = statistics.stdev(historicdata["wOBA"]))
         floor = norm.ppf(q = max(0.01, cdf - floorminus), loc = statistics.mean(historicdata["wOBA"]), scale = statistics.stdev(historicdata["wOBA"]))
         projection = statistics.mean(historicdata[(historicdata["wOBA"] <= ceiling) & (historicdata["wOBA"] >= floor)]["FDScore"].values)
-        alldata.append([name,battingorder,salary,position,team,opponent,projection])
+        alldata.append([name,battingorder,salary,position,team,opponent,projection,projection/salary*1000])
 
-    alldatadf = pd.DataFrame(alldata,columns=["Name","Batting Order","Salary","Position","Team","Opponent","Projection"])
+    alldatadf = pd.DataFrame(alldata,columns=["Name","Batting Order","Salary","Position","Team","Opponent","Projection","Value"])
+    alldatadf = alldatadf.sort_values(by="Projection",ascending=False)
+    return alldatadf, pitcherdf
 
+def teamsummary(alldatadf):
     hitterteams = list(pd.unique(alldatadf["Team"]))
-
     teamsummary =[]
     for team in hitterteams:
         filtered = alldatadf[alldatadf["Team"] == team]
@@ -64,13 +69,61 @@ def dataload(file):
         salary = sum(top["Salary"])
         teamsummary.append([team,proj,salary,proj/salary*1000])
     teamsummarydf = pd.DataFrame(teamsummary,columns=["Team","Projection","Salary","Value"])
-    print(alldatadf)
-    print(teamsummarydf)
-    return alldatadf, teamsummarydf
+    teamsummarydf = teamsummarydf.sort_values(by="Projection",ascending=False)
+    return teamsummarydf
+
+def pitchersummary(pitcherdf, teamsummarydf):
+    teamsummarydf["Opponent Rank"] = teamsummarydf["Projection"].rank(method="average",ascending=False)
+    maxrank = max(teamsummarydf["Opponent Rank"])
+    teamsummarydf = teamsummarydf[["Team","Opponent Rank"]]
+    teamsummarydf = teamsummarydf.rename({"Team":"Opponent"},axis=1)
+    pitcherdf = pd.merge(pitcherdf,teamsummarydf,how="inner",on="Opponent")
+    print(pitcherdf)
+    pitcherdf["Total Rank"] = pitcherdf["Rank"] + (maxrank - pitcherdf["Opponent Rank"])
+    pitcherdf["Total Rank"] = pitcherdf["Total Rank"].rank(method="average",ascending=True)
+    return pitcherdf
+
+def top_fourstacks(alldatadf):
+    hitterteams = list(pd.unique(alldatadf["Team"]))
+    stackprojections = []
+    stacks = [[1,2,3,4],
+              [2,3,4,5],
+              [3,4,5,6],
+              [1,2,4,5],
+              [2,4,5,6],
+              [1,3,4,5],
+              [1,2,3,5],
+              [2,3,5,6],
+              [9,1,2,3],
+              [9,1,2,4],
+              [9,1,3,4],
+              [9,2,3,4],
+              [1,3,5,6]]
+    for team in hitterteams:
+        for stack in stacks:
+            filtered = alldatadf[(alldatadf["Team"] == team) & (alldatadf["Batting Order"].isin(stack))]
+            proj = sum(filtered["Projection"])
+            salary = sum(filtered["Salary"])
+            namelist = list(filtered["Name"].values)
+            stackprojections.append([stack,team,proj,salary,proj/salary*1000,namelist])
+    stacksdf = pd.DataFrame(stackprojections, columns=["Stack","Team","Projection","Salary","Value","Hitters"])
+    stacksdf = stacksdf.sort_values(by="Projection",ascending=False)
+    return stacksdf
+        
 
 
 st.title("Data!")
-all_players = st.file_uploader("Full Day Slate")
-alldatadf, teamsummarydf = dataload(all_players)
-st.dataframe(alldatadf)
+all_players = st.file_uploader("Upload FD CSV")
+alldatadf, pitcherdf = dataload(all_players)
+teamsummarydf = teamsummary(alldatadf)
+pitchersummarydf = pitchersummary(pitcherdf,teamsummarydf)
+stacksdf = top_fourstacks(alldatadf)
+st.dataframe(alldatadf, hide_index = True)
+st.write("-"*100)
+st.dataframe(pitchersummarydf, hide_index = True)
+st.write("-"*100)
+st.dataframe(teamsummarydf,hide_index = True)
+st.write("--"*100)
+st.dataframe(stacksdf, hide_index=True, width=1500)
+
 

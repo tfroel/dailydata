@@ -148,7 +148,7 @@ def currentslate(matchupdf):
             xfip = xfip
         else:
             xfip = ((13*flyballs*0.12) + (3*(bbs+hbps)) - (2*(ks)))/ips + 3.2
-        k_ratio = ks/tbf*100
+        k_ratio = ks/tbf
         bb_ratio = bbs/tbf*100
         swstr_ratio23 = whiff23/pitches23*100
         try:
