@@ -9,10 +9,10 @@ import tkinter as tk
 from tkinter import filedialog
 
 
-def currentslate(file):
+def currentslate(matchupdf):
     parkfactors = pd.read_csv("parkfactors.csv")
     mlb = mlbstatsapi.Mlb()
-    FD = pd.read_csv(file)
+    FD = matchupdf
     FD = FD[FD["Probable Pitcher"] == "Yes"]
     starters = FD["Nickname"]
     matchups = FD["Game"].to_list()

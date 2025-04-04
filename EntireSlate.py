@@ -11,11 +11,11 @@ import statistics
 
 @st.cache_data
 def dataload(file):
-    historicdata = pd.read_csv("historic_data.csv")
-    hitterdf = currentslatehitters.currentslatehitters(file)
-    hitterdf = hitterdf.drop(0)
-    pitcherdf = currentslate.currentslate(file)
     matchupdf = pd.read_csv(file)
+    historicdata = pd.read_csv("historic_data.csv")
+    hitterdf = currentslatehitters.currentslatehitters(matchupdf)
+    hitterdf = hitterdf.drop(0)
+    pitcherdf = currentslate.currentslate(matchupdf)
     pitcherdf = pitcherdf.drop(index=0)
     pitcherdf["K% Rank"] = pitcherdf["K%"].rank(method='average',ascending=False)
     pitcherdf["BB% Rank"] = pitcherdf["BB%"].rank(method='average',ascending=True)
@@ -64,6 +64,8 @@ def dataload(file):
         salary = sum(top["Salary"])
         teamsummary.append([team,proj,salary,proj/salary*1000])
     teamsummarydf = pd.DataFrame(teamsummary,columns=["Team","Projection","Salary","Value"])
+    print(alldatadf)
+    print(teamsummarydf)
     return alldatadf, teamsummarydf
 
 

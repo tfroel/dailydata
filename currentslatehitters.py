@@ -9,9 +9,9 @@ import tkinter as tk
 from tkinter import filedialog
 
 
-def currentslatehitters(file):
+def currentslatehitters(matchupdf):
     mlb = mlbstatsapi.Mlb()
-    FD = pd.read_csv(file)
+    FD = matchupdf
     FD = FD[FD["Position"] != "P"]
     FD = FD[FD["Injury Indicator"] != "O"]
     FD = FD[FD["Injury Indicator"] != "IL"]
