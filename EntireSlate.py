@@ -106,12 +106,15 @@ def top_fourstacks(alldatadf):
               [9,2,3,4],
               [1,3,5,6]]
     for team in hitterteams:
-        for stack in stacks:
-            filtered = alldatadf[(alldatadf["Team"] == team) & (alldatadf["Batting Order"].isin(stack))]
-            proj = sum(filtered["Projection"])
-            salary = sum(filtered["Salary"])
-            namelist = list(filtered["Name"].values)
-            stackprojections.append([stack,team,proj,salary,proj/salary*1000,namelist])
+        try:
+            for stack in stacks:
+                filtered = alldatadf[(alldatadf["Team"] == team) & (alldatadf["Batting Order"].isin(stack))]
+                proj = sum(filtered["Projection"])
+                salary = sum(filtered["Salary"])
+                namelist = list(filtered["Name"].values)
+                stackprojections.append([stack,team,proj,salary,proj/salary*1000,namelist])
+        except:
+            pass
     stacksdf = pd.DataFrame(stackprojections, columns=["Stack","Team","Projection","Salary","Value","Hitters"])
     stacksdf = stacksdf.sort_values(by="Projection",ascending=False)
     print(stacksdf.head())
