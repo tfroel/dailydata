@@ -1,8 +1,5 @@
 python-mlb-statsapi
 requests
-<<<<<<< HEAD
-=======
 scipy
 beautifulsoup4
 streamlit >= 1.9.2
->>>>>>> f0f68574039489fcbda68a009b1e6042c1192e5e
