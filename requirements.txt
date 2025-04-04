@@ -1,5 +1,5 @@
 python-mlb-statsapi
 requests
-scipy.stats
+scipy
 beautifulsoup4
 streamlit >= 1.9.2
