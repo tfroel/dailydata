@@ -44,7 +44,10 @@ def dataload(file):
         salary = matchupdf[matchupdf["Nickname"] == name]["Salary"].values[0]
         team = matchupdf[matchupdf["Nickname"] == name]["Team"].values[0]
         opponent = matchupdf[matchupdf["Nickname"] == name]["Opponent"].values[0]
-        opp_pitchrank = pitcherdf[pitcherdf["Team"] == opponent]["Rank"].values[0]
+        try:
+            opp_pitchrank = pitcherdf[pitcherdf["Team"] == opponent]["Rank"].values[0]
+        except:
+            opp_pitchrank = maxrank/2
         floorminus = (maxrank - opp_pitchrank + 1) * 0.05/(maxrank/2)
         ceilingplus = opp_pitchrank * 0.05/(maxrank/2)
         cdf = norm.cdf(x = woba, loc = statistics.mean(historicdata["wOBA"]), scale = statistics.stdev(historicdata["wOBA"]))
@@ -55,6 +58,8 @@ def dataload(file):
 
     alldatadf = pd.DataFrame(alldata,columns=["Name","Batting Order","Salary","Position","Team","Opponent","Projection","Value"])
     alldatadf = alldatadf.sort_values(by="Projection",ascending=False)
+    print(alldatadf.head())
+    print(pitcherdf.head())
     return alldatadf, pitcherdf
 
 def teamsummary(alldatadf):
@@ -68,17 +73,20 @@ def teamsummary(alldatadf):
         teamsummary.append([team,proj,salary,proj/salary*1000])
     teamsummarydf = pd.DataFrame(teamsummary,columns=["Team","Projection","Salary","Value"])
     teamsummarydf = teamsummarydf.sort_values(by="Projection",ascending=False)
+    print(teamsummarydf.head())
     return teamsummarydf
 
 def pitchersummary(pitcherdf, teamsummarydf):
-    teamsummarydf["Opponent Rank"] = teamsummarydf["Projection"].rank(method="average",ascending=False)
-    maxrank = max(teamsummarydf["Opponent Rank"])
-    teamsummarydf = teamsummarydf[["Team","Opponent Rank"]]
-    teamsummarydf = teamsummarydf.rename({"Team":"Opponent"},axis=1)
-    pitcherdf = pd.merge(pitcherdf,teamsummarydf,how="inner",on="Opponent")
-    print(pitcherdf)
+    teamsummarydfhere = teamsummarydf
+    teamsummarydfhere["Opponent Rank"] = teamsummarydfhere["Projection"].rank(method="average",ascending=False)
+    maxrank = max(teamsummarydfhere["Opponent Rank"])
+    teamsummarydfhere = teamsummarydfhere[["Team","Opponent Rank"]]
+    teamsummarydfhere = teamsummarydfhere.rename({"Team":"Opponent"},axis=1)
+    pitcherdf = pd.merge(pitcherdf,teamsummarydfhere,how="inner",on="Opponent")
     pitcherdf["Total Rank"] = pitcherdf["Rank"] + (maxrank - pitcherdf["Opponent Rank"])
     pitcherdf["Total Rank"] = pitcherdf["Total Rank"].rank(method="average",ascending=True)
+    pitcherdf = pitcherdf.sort_values(by="Total Rank",ascending=True)
+    print(pitcherdf.head())
     return pitcherdf
 
 def top_fourstacks(alldatadf):
@@ -106,8 +114,8 @@ def top_fourstacks(alldatadf):
             stackprojections.append([stack,team,proj,salary,proj/salary*1000,namelist])
     stacksdf = pd.DataFrame(stackprojections, columns=["Stack","Team","Projection","Salary","Value","Hitters"])
     stacksdf = stacksdf.sort_values(by="Projection",ascending=False)
+    print(stacksdf.head())
     return stacksdf
-        
 
 
 st.title("Data!")
@@ -118,13 +126,16 @@ else:
     alldatadf, pitcherdf = dataload(all_players)
     teamsummarydf = teamsummary(alldatadf)
     pitchersummarydf = pitchersummary(pitcherdf,teamsummarydf)
-    stacksdf = top_fourstacks(alldatadf)
     st.dataframe(alldatadf, hide_index = True)
     st.write("-"*100)
     st.dataframe(pitchersummarydf, hide_index = True)
     st.write("-"*100)
-    st.dataframe(teamsummarydf,hide_index = True)
+    st.dataframe(teamsummarydf[["Team","Projection","Salary","Value"]],hide_index = True)
     st.write("--"*100)
-    st.dataframe(stacksdf, hide_index=True)
+    try:
+        stacksdf = top_fourstacks(alldatadf)
+        st.dataframe(stacksdf, hide_index=True)
+    except:
+        pass
 
 
