@@ -48,7 +48,6 @@ def currentslate(matchupdf):
             pf = parkfactors[parkfactors["Team"] == team]["Park Factor"].values[0]
             spidname = names[name]
             spid = mlb.get_people_id(spidname)[0]
-<<<<<<< HEAD
             try:
                 link_brd = "https://statsapi.mlb.com/api/v1/people/" + str(spid) + "/stats?stats=sabermetrics&season=2024"
                 r = requests.get(link_brd)
@@ -82,33 +81,6 @@ def currentslate(matchupdf):
             link_brd = "https://statsapi.mlb.com/api/v1/people/" + str(spid) + "/stats?stats=lastXGames&season=2025"
             r = requests.get(link_brd)
             soup = bs(r.content,"html.parser")
-=======
-            link_brd = "https://statsapi.mlb.com/api/v1/people/" + str(spid) + "/stats?stats=sabermetrics&season=2024"
-            r = requests.get(link_brd)
-            soup = bs(r.content,"html.parser")
-            statdict = ast.literal_eval(soup.contents[0])
-            statdict = statdict["stats"][0]["splits"][-1]["stat"]
-            xfip = statdict["xfip"]
-            try:
-                pparams = {
-                "season":2025,
-                "startDate":"2025-01-01",
-                "endDate":"2025-12-31"
-            }
-                flyballs = 0
-                plstatdict = mlb.get_player_stats(spid,stats=["pitchLog"],groups=["pitching"],**pparams)
-                allpitches = plstatdict["pitching"]["pitchlog"].splits
-                for pitch in allpitches:
-                    if pitch.stat.details.isinplay == True:
-                        desc = pitch.stat.details.description
-                        if " fly " in desc or " flies " in desc or " pop" in desc:
-                            flyballs += 1
-            except:
-                flyballs = None
-            link_brd = "https://statsapi.mlb.com/api/v1/people/" + str(spid) + "/stats?stats=lastXGames&season=2025"
-            r = requests.get(link_brd)
-            soup = bs(r.content,"html.parser")
->>>>>>> 3fa5db4a055842a9541ff0cab1f0f991d247ed54
             games23 = 0
             games24 = 0
             try:
@@ -157,26 +129,16 @@ def currentslate(matchupdf):
                 hrs += statdict["homeRuns"]
             ips = ips/3
             params = {
-<<<<<<< HEAD
                 "season":2024
             }
-=======
-            "season":2024
-        }
->>>>>>> 3fa5db4a055842a9541ff0cab1f0f991d247ed54
             s23 = mlb.get_player_stats(spid,stats=["season","seasonAdvanced"],groups=["pitching"],**params) 
             s23std = s23["pitching"]["season"].splits[-1].stat
             s23adv = s23["pitching"]["seasonadvanced"].splits[-1].stat
 
             try:
                 params = {
-<<<<<<< HEAD
                 "season":2025
             }
-=======
-            "season":2025
-        }
->>>>>>> 3fa5db4a055842a9541ff0cab1f0f991d247ed54
                 s24 = mlb.get_player_stats(spid,stats=["season","seasonAdvanced"],groups=["pitching"],**params) 
                 s24std = s24["pitching"]["season"].splits[-1].stat
                 s24adv = s24["pitching"]["seasonadvanced"].splits[-1].stat
