@@ -13,11 +13,12 @@ st.set_page_config(
 @st.cache_data
 def dataload(file):
     matchupdf = pd.read_csv(file)
-    historicdata = pd.read_csv("historic_data.csv")
-    hitterdf = currentslatehitters.currentslatehitters(matchupdf)
-    hitterdf = hitterdf.drop(0)
+    matchupdf = matchupdf[matchupdf["Batting Order"] != 0]
+    historicdata = pd.read_csv("historic_data.csv")    
     pitcherdf = currentslate.currentslate(matchupdf)
     pitcherdf = pitcherdf.drop(index=0)
+    hitterdf = currentslatehitters.currentslatehitters(matchupdf)
+    hitterdf = hitterdf.drop(0)
     pitcherdf["K% Rank"] = pitcherdf["K%"].rank(method='average',ascending=False)
     pitcherdf["BB% Rank"] = pitcherdf["BB%"].rank(method='average',ascending=True)
     pitcherdf["SwStr% Rank"] = pitcherdf["SwStr%"].rank(method='average',ascending=False)
@@ -53,7 +54,10 @@ def dataload(file):
         cdf = norm.cdf(x = woba, loc = statistics.mean(historicdata["wOBA"]), scale = statistics.stdev(historicdata["wOBA"]))
         ceiling = norm.ppf(q = min(0.99, cdf + ceilingplus), loc = statistics.mean(historicdata["wOBA"]), scale = statistics.stdev(historicdata["wOBA"]))
         floor = norm.ppf(q = max(0.01, cdf - floorminus), loc = statistics.mean(historicdata["wOBA"]), scale = statistics.stdev(historicdata["wOBA"]))
-        projection = statistics.mean(historicdata[(historicdata["wOBA"] <= ceiling) & (historicdata["wOBA"] >= floor)]["FDScore"].values)
+        try:
+            projection = statistics.mean(historicdata[(historicdata["wOBA"] <= ceiling) & (historicdata["wOBA"] >= floor)]["FDScore"].values)
+        except:
+            projection = 11
         alldata.append([name,battingorder,salary,position,team,opponent,projection,projection/salary*1000])
 
     alldatadf = pd.DataFrame(alldata,columns=["Name","Batting Order","Salary","Position","Team","Opponent","Projection","Value"])
