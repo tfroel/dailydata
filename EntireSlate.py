@@ -16,8 +16,8 @@ def dataload(file):
     historicdata = pd.read_csv("historic_data.csv")    
     pitcherdf = currentslate.currentslate(matchupdf)
     pitcherdf = pitcherdf.drop(index=0)
-    matchupdf = matchupdf[matchupdf["Batting Order"] != 0]
-    hitterdf = currentslatehitters.currentslatehitters(matchupdf)
+    hitmatchupdf = matchupdf[matchupdf["Batting Order"] != 0]
+    hitterdf = currentslatehitters.currentslatehitters(hitmatchupdf)
     hitterdf = hitterdf.drop(0)
     pitcherdf["K% Rank"] = pitcherdf["K%"].rank(method='average',ascending=False)
     pitcherdf["BB% Rank"] = pitcherdf["BB%"].rank(method='average',ascending=True)
