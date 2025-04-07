@@ -13,10 +13,10 @@ st.set_page_config(
 @st.cache_data
 def dataload(file):
     matchupdf = pd.read_csv(file)
-    matchupdf = matchupdf[matchupdf["Batting Order"] != 0]
     historicdata = pd.read_csv("historic_data.csv")    
     pitcherdf = currentslate.currentslate(matchupdf)
     pitcherdf = pitcherdf.drop(index=0)
+    matchupdf = matchupdf[matchupdf["Batting Order"] != 0]
     hitterdf = currentslatehitters.currentslatehitters(matchupdf)
     hitterdf = hitterdf.drop(0)
     pitcherdf["K% Rank"] = pitcherdf["K%"].rank(method='average',ascending=False)
