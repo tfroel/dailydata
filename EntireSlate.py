@@ -127,7 +127,7 @@ def top_fourstacks(alldatadf):
 
 st.title("Data!")
 all_players = st.file_uploader("Upload FD CSV")
-rolling_games = st.number_input("Rolling Games",format="%0f",value=60)
+rolling_games = st.number_input("Rolling Games",value=60)
 if all_players is None:
     st.markdown("Upload File")
 else:
