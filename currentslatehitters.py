@@ -7,7 +7,7 @@ import requests
 import ast
 
 
-def currentslatehitters(matchupdf):
+def currentslatehitters(matchupdf, rolling_games = 60):
     mlb = mlbstatsapi.Mlb()
     FD = matchupdf
     FD = FD[FD["Position"] != "P"]
@@ -50,7 +50,7 @@ def currentslatehitters(matchupdf):
             hitteridname = names[hitter]
             id = mlb.get_people_id(hitteridname)[0]
             params = {"season":2025,
-                    "limit":60}
+                    "limit":rolling_games}
             stat_dict = mlb.get_player_stats(id,stats=["lastXGames"],groups=["hitting"],**params)
             try: 
                 lastx = stat_dict["hitting"]["lastxgames"].splits[-1].stat
@@ -75,7 +75,7 @@ def currentslatehitters(matchupdf):
             if lastxgames == None:
                 params = {
                     "season":2024,
-                    "limit":60}
+                    "limit":rolling_games}
                 try:
                     lxstat_dict = mlb.get_player_stats(id,stats=["lastXGames"],groups=["hitting"],**params)
                     lastx = lxstat_dict["hitting"]["lastxgames"].splits[-1].stat
@@ -97,10 +97,10 @@ def currentslatehitters(matchupdf):
                     lastxsacflies = lastx.sacflies    
                 except:
                     pass
-            if lastxgames < 60:
+            if lastxgames < rolling_games:
                 params = {
                     "season":2024,
-                    "limit":60-lastxgames}
+                    "limit":rolling_games-lastxgames}
                 lxstat_dict = mlb.get_player_stats(id,stats=["lastXGames"],groups=["hitting"],**params)
                 try:
                     lastx = lxstat_dict["hitting"]["lastxgames"].splits[-1].stat
