@@ -11,13 +11,13 @@ st.set_page_config(
 )
 
 @st.cache_data
-def dataload(file):
+def dataload(file, rolling_games):
     matchupdf = pd.read_csv(file)
     historicdata = pd.read_csv("historic_data.csv")    
     pitcherdf = currentslate.currentslate(matchupdf)
     pitcherdf = pitcherdf.drop(index=0)
     hitmatchupdf = matchupdf[matchupdf["Batting Order"] != 0]
-    hitterdf = currentslatehitters.currentslatehitters(hitmatchupdf)
+    hitterdf = currentslatehitters.currentslatehitters(hitmatchupdf,rolling_games)
     hitterdf = hitterdf.drop(0)
     pitcherdf["K% Rank"] = pitcherdf["K%"].rank(method='average',ascending=False)
     pitcherdf["BB% Rank"] = pitcherdf["BB%"].rank(method='average',ascending=True)
@@ -127,10 +127,11 @@ def top_fourstacks(alldatadf):
 
 st.title("Data!")
 all_players = st.file_uploader("Upload FD CSV")
+rolling_games = st.number_input("Rolling Games",format="%0f",value=60)
 if all_players is None:
     st.markdown("Upload File")
 else:
-    alldatadf, pitcherdf = dataload(all_players)
+    alldatadf, pitcherdf = dataload(all_players,rolling_games)
     teamsummarydf = teamsummary(alldatadf)
     pitchersummarydf = pitchersummary(pitcherdf,teamsummarydf)
     st.dataframe(alldatadf, hide_index = True)
